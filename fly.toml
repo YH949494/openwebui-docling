@@ -1,0 +1,44 @@
+# IMPORTANT:
+# 1) Change the app name below if it is already taken.
+# 2) Keep this Docling app in the SAME Fly.io organization as OpenWebUI
+#    so OpenWebUI can reach it over Fly private networking.
+
+app = "yh-openwebui-docling"
+primary_region = "sin"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  # Bind to IPv6 so Fly's private .internal network can reach Docling.
+  UVICORN_HOST = "::"
+  UVICORN_PORT = "5001"
+  UVICORN_WORKERS = "1"
+
+  # Production-safe defaults.
+  DOCLING_SERVE_ENABLE_UI = "false"
+  DOCLING_SERVE_LOG_LEVEL = "INFO"
+  DOCLING_SERVE_LOG_FORMAT = "json"
+  DOCLING_SERVE_ENABLE_REMOTE_SERVICES = "false"
+  DOCLING_SERVE_ALLOW_EXTERNAL_PLUGINS = "false"
+  DOCLING_SERVE_LOAD_MODELS_AT_BOOT = "true"
+
+  # Conservative limits for an office deployment.
+  # Prevent one upload from consuming excessive resources.
+  DOCLING_SERVE_MAX_FILE_SIZE = "52428800"
+  DOCLING_SERVE_MAX_NUM_PAGES = "200"
+  DOCLING_SERVE_MAX_DOCUMENT_TIMEOUT = "600"
+
+  # Keep CPU usage predictable.
+  OMP_NUM_THREADS = "2"
+
+# Intentionally NO [http_service] or [[services]] block.
+# This keeps Docling off the public internet.
+# OpenWebUI should call:
+#   http://yh-openwebui-docling.internal:5001
+#
+# The machine stays running because no Fly Proxy auto-stop service is configured.
+
+[[vm]]
+  size = "shared-cpu-2x"
+  memory = "4gb"
