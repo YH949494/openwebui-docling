@@ -1,44 +1,37 @@
-# IMPORTANT:
-# 1) Change the app name below if it is already taken.
-# 2) Keep this Docling app in the SAME Fly.io organization as OpenWebUI
-#    so OpenWebUI can reach it over Fly private networking.
+# fly.toml app configuration file generated for openwebui-docling on 2026-07-14T03:02:18Z
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
 
-app = "yh-openwebui-docling"
-primary_region = "sin"
+app = 'openwebui-docling'
+primary_region = 'sin'
 
 [build]
-  dockerfile = "Dockerfile"
+  dockerfile = 'Dockerfile'
 
 [env]
-  # Bind to IPv6 so Fly's private .internal network can reach Docling.
-  UVICORN_HOST = "::"
-  UVICORN_PORT = "5001"
-  UVICORN_WORKERS = "1"
+  DOCLING_SERVE_ALLOW_EXTERNAL_PLUGINS = 'false'
+  DOCLING_SERVE_ENABLE_REMOTE_SERVICES = 'false'
+  DOCLING_SERVE_ENABLE_UI = 'false'
+  DOCLING_SERVE_LOAD_MODELS_AT_BOOT = 'true'
+  DOCLING_SERVE_LOG_FORMAT = 'json'
+  DOCLING_SERVE_LOG_LEVEL = 'INFO'
+  DOCLING_SERVE_MAX_DOCUMENT_TIMEOUT = '600'
+  DOCLING_SERVE_MAX_FILE_SIZE = '52428800'
+  DOCLING_SERVE_MAX_NUM_PAGES = '200'
+  OMP_NUM_THREADS = '2'
+  UVICORN_HOST = '::'
+  UVICORN_PORT = '5001'
+  UVICORN_WORKERS = '1'
 
-  # Production-safe defaults.
-  DOCLING_SERVE_ENABLE_UI = "false"
-  DOCLING_SERVE_LOG_LEVEL = "INFO"
-  DOCLING_SERVE_LOG_FORMAT = "json"
-  DOCLING_SERVE_ENABLE_REMOTE_SERVICES = "false"
-  DOCLING_SERVE_ALLOW_EXTERNAL_PLUGINS = "false"
-  DOCLING_SERVE_LOAD_MODELS_AT_BOOT = "true"
-
-  # Conservative limits for an office deployment.
-  # Prevent one upload from consuming excessive resources.
-  DOCLING_SERVE_MAX_FILE_SIZE = "52428800"
-  DOCLING_SERVE_MAX_NUM_PAGES = "200"
-  DOCLING_SERVE_MAX_DOCUMENT_TIMEOUT = "600"
-
-  # Keep CPU usage predictable.
-  OMP_NUM_THREADS = "2"
-
-# Intentionally NO [http_service] or [[services]] block.
-# This keeps Docling off the public internet.
-# OpenWebUI should call:
-#   http://yh-openwebui-docling.internal:5001
-#
-# The machine stays running because no Fly Proxy auto-stop service is configured.
+[http_service]
+  internal_port = 5001
+  force_https = true
+  auto_stop_machines = 'stop'
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
 
 [[vm]]
-  size = "shared-cpu-2x"
-  memory = "4gb"
+  size = 'shared-cpu-2x'
+  memory = '4gb'
