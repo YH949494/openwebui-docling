@@ -1,0 +1,43 @@
+name: Deploy Docling to Fly.io
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "Dockerfile"
+      - "fly.toml"
+      - ".github/workflows/deploy-docling.yml"
+      - "**/*.py"
+      - "requirements*.txt"
+      - "pyproject.toml"
+      - "uv.lock"
+
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-openwebui-docling
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy Docling
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Deploy to Fly.io
+        run: flyctl deploy --remote-only --app openwebui-docling
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      - name: Verify machine status
+        run: flyctl status --app openwebui-docling
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
